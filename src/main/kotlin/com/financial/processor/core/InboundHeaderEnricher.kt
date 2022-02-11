@@ -7,7 +7,7 @@ private const val CHANNEL_PREFIX = "financial-processor"
 private const val ISSUING_ROUTE_HEADER = "issuing-route-header"
 
 @Component("financial-processor.inbound-enricher")
-@Service
+@Service //TODO: remove this
 class InboundHeaderEnricher {
 
     fun addRouteHeader(message: FinancialMessage): Map<String, Any> {
