@@ -1,35 +1,60 @@
 package com.financial.processor.reactivetest
 
-import org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE
+import org.springframework.context.annotation.Bean
+import org.springframework.integration.annotation.InboundChannelAdapter
+import org.springframework.integration.annotation.Poller
 import org.springframework.integration.annotation.ServiceActivator
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import reactor.core.publisher.Flux
+import org.springframework.integration.channel.FluxMessageChannel
+import org.springframework.integration.dsl.IntegrationFlow
+import org.springframework.integration.dsl.IntegrationFlows
+import org.springframework.messaging.MessageChannel
+import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.Supplier
 
 
-@Controller
+@Component
 class ProcessingServiceActivator {
 
-    @ServiceActivator(inputChannel = "test" , outputChannel = "fluxChannel")
-    fun processingServiceActivator(input: Mono<String>): Mono<String> {
-        return input;
+    @ServiceActivator(inputChannel = "fluxChannel", outputChannel ="splitInput")
+    fun processingServiceActivator(input: Int): Mono<Int> {
+        println("arrived $input")
+        return Mono.just(input)
     }
 
-//    @ServiceActivator(inputChannel = "fluxChannel" , outputChannel = "fluxChannel", reactive = Reactive("bean"))
-//    fun processingServiceActivatorOutput(input: Mono<String>) {
-//        return input;
-//    }
-
-    @GetMapping("/event" , produces = [TEXT_EVENT_STREAM_VALUE])
-    fun getPatientAlerts(): Flux<String> {
-        return Flux
+    @ServiceActivator(inputChannel = "reactiveChannel")
+    fun reactiveServiceActivator(input: Int) {
+        println("reactive subscribed:  $input")
     }
 
+    @Bean
+    fun counter(): AtomicInteger {
+        return AtomicInteger()
+    }
 
-    @GetMapping("/generate/{text}")
-    fun generateJmsMessage(@PathVariable text: String) {
+    @Bean
+    @InboundChannelAdapter(
+        value = "fluxChannel",
+        poller = [Poller(fixedDelay = "2000", maxMessagesPerPoll = "3", taskExecutor = "taskExecutor")]
+    )
+    fun counterMessageSupplier(counter: AtomicInteger): Supplier<Int> {
+        return Supplier<Int> {
+            val i: Int = counter.incrementAndGet()
+            if (i % 2 == 0) i else null
+        }
+    }
 
+    @Bean
+    fun fluxChannel(): MessageChannel {
+        return FluxMessageChannel()
+    }
+
+    @Bean
+    fun splitFlow(): IntegrationFlow {
+        return IntegrationFlows.from("splitInput")
+            .split()
+            .channel("reactiveChannel")
+            .get()
     }
 }
