@@ -13,6 +13,7 @@
     <!-- Component declaration    -->
     <int:message-history/>
     <int:channel id="financial.processor-outbound-tcp-channel"/>
+<!--    <int:channel id="financial-processor.inbound-route-header-channel"/>-->
 
     <int-ip:tcp-connection-factory id="connection-factory"
                                    type="server"
@@ -20,14 +21,15 @@
                                    serializer="byteLengthSerializer"
                                    deserializer="byteLengthSerializer"
                                    using-nio="true"
-                                   single-use="false"
+                                   single-use="true"
     />
 
     <!-- Inbound Flow Components -->
     <int-ip:tcp-inbound-channel-adapter id="financial.processor-inbound-client"
                                         channel="bytesToStringChannel"
                                         retry-interval="5000"
-                                        connection-factory="connection-factory"/>
+                                        connection-factory="connection-factory"
+                                        auto-startup="${financial-processor.start-tcp-interfaces}"/>
 
     <int:object-to-string-transformer input-channel="bytesToStringChannel"
                                       output-channel="financial-processor.inbound-transformer-channel"/>
@@ -40,22 +42,31 @@
     </int:transformer>
 
     <int:header-enricher default-overwrite="true"
-                         input-channel="financial-processor-inbound-route-header-channel"
-                         output-channel="financial-processor-mono-wrapper"
+                         input-channel="financial-processor.inbound-route-header-channel"
+                         output-channel="financial-processor.mono-wrapper"
                          ref="financial-processor.inbound-enricher"
                          method="addRouteHeader" />
-<!--    "financial-processor.0800" -->
+    <!--  header output example:  "financial-processor.0800" -->
 
     <int:transformer id="transformer.mono-wrapper"
                      ref="financial-processor.mono-wrapper-transformer"
                      method="wrap"
-                     input-channel="financial.processor-mono-wrapper"
-                     output-channel="financial.processor-inbound-router-channel">
+                     input-channel="financial-processor.mono-wrapper"
+                     output-channel="financial-processor.inbound-router-channel">
     </int:transformer>
 
-    <int:router ref="financial-processor.command-router" method="route" input-channel="financial.processor-inbound-router-channel"/>
+    <int:router ref="financial-processor.command-router" method="route" input-channel="financial-processor.inbound-router-channel"/>
+
+    <int:splitter input-channel="outbound-mono-unwraper-channel" output-channel="financial-processor.outbound-iso-to-string-transformer-channel" />
+
+    <int:transformer id="financial-processor.outbound-iso-to-string-transformer"
+                     ref="financial-processor.iso-message-transformer"
+                     method="transformToString"
+                     input-channel="financial-processor.outbound-iso-to-string-transformer-channel"
+                     output-channel="financial.processor-outbound-tcp-channel">
+    </int:transformer>
 
     <int-ip:tcp-outbound-channel-adapter channel="financial.processor-outbound-tcp-channel"
+                                         auto-startup="${financial-processor.start-tcp-interfaces}"
                                          connection-factory="connection-factory"/>
-
 </beans>

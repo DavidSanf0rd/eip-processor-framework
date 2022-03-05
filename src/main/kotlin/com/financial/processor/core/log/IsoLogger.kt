@@ -2,8 +2,10 @@ package com.financial.processor.core.log
 
 import com.financial.processor.core.FinancialMessage
 import com.solab.iso8583.IsoMessage
+import org.springframework.stereotype.Component
 
 
+@Component
 class IsoLogger {
 
     fun log(isoMessage: FinancialMessage) {

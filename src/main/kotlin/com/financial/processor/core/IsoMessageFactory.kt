@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 
 import java.text.SimpleDateFormat
 
-private const val ISO_TEMPLATE_FILE_PATH = "iso-template/config_iso_message.xml"
+private const val ISO_TEMPLATE_FILE_PATH = "template/config_iso_message.xml"
 
 @Component
 class IsoMessageFactory {

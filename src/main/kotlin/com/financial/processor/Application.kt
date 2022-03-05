@@ -11,6 +11,6 @@ import org.springframework.integration.annotation.IntegrationComponentScan
 open class Application
 
 fun main(args: Array<String>) {
-    System.setProperty("spring.config.location", "optional:classpath:financial-processor.yml, optional:file:/etc/seven/financial-processor.yml")
+    System.setProperty("spring.config.location", "optional:classpath:application.yml, optional:file:/etc/seven/application.yml")
     runApplication<Application>(*args)
 }

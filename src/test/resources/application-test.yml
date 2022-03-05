@@ -1,0 +1,3 @@
+financial-processor:
+  server-port: 7777
+  start-tcp-interfaces: false
