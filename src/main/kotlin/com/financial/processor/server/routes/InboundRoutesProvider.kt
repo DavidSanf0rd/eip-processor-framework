@@ -7,5 +7,6 @@ class InboundRoutesProvider {
 
     companion object {
         const val EXAMPLE_ROUTE = "financial-processor.0800"
+        const val PAYMENT = "financial-processor.0200"
     }
 }
