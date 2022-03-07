@@ -27,6 +27,7 @@ class PaymentController @Autowired constructor(
 
 
     private fun processPayment(financialMessage: FinancialMessage): FinancialMessage {
+        val successCode = "00"
         val fields = financialMessage.fields
 
         val date = fields.getObjectValue<Date>(7)
@@ -34,7 +35,7 @@ class PaymentController @Autowired constructor(
 
         val responseFields = messageFactory.j8583Factory.newMessage(0x210)
         responseFields.copyFieldsFrom(fields, 2,3,4,7, 11, 14, 18, 22, 25, 35, 37, 41, 49)
-        responseFields.setValue(39, "00", IsoType.ALPHA, 2)
+        responseFields.setValue(39, successCode, IsoType.ALPHA, 2)
 
         return FinancialMessage(
             isoMessageTypeIndicator = "0210",
