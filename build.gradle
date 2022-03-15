@@ -24,6 +24,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-integration:2.6.3'
     testImplementation 'org.springframework.integration:spring-integration-test:5.5.8'
     implementation 'org.springframework.integration:spring-integration-ip:5.5.8'
+    implementation 'org.apache.logging.log4j:log4j:2.17.2'
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'

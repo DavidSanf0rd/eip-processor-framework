@@ -1,3 +1,8 @@
 financial-processor:
   server-port: 7777
   start-tcp-interfaces: true
+  iso8583.header-lenght: 0
+
+logging:
+  level:
+    org.springframework.integration: DEBUG
